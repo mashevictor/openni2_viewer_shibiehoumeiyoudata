@@ -217,8 +217,19 @@ public:
   cloud_callback (const CloudConstPtr& cloud)
   {
     FPS_CALC ("cloud callback");
+    char filename[20] = {0};
     boost::mutex::scoped_lock lock (cloud_mutex_);
     cloud_ = cloud;
+    static int count=0;
+    count++;
+    if(count<=50)
+    {
+    cout<<"**************最外面************* "<<count<<" is saved"<<endl;
+    sprintf(filename,"./data/%d.pcd",count);
+    pcl::io::savePCDFile (filename, *cloud);
+    }
+    else
+    exit(0);
   }
 
   void
@@ -410,14 +421,10 @@ public:
                 cloud2->points[i].z = cloud_abovePlane->points[i].z;
             }
             int i = 0;
-            pcl::PCDWriter writer;
-            for(int count=0;count<100;count++)
-            {
                 double now = pcl::getTime ();
                 char *dirName=new char[20] ;
                 int status;
-                cout<<"the "<<count<<" is saved"<<endl;
-                sprintf(dirName,"%f",now,count);
+                sprintf(dirName,"%f",now);
                 status=mkdir(dirName, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
                 for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
                 {
@@ -448,7 +455,7 @@ public:
                     char filename_temp[20] = {0};
                     char filename_vfhs[20] = {0};
                     static int i=0;
-                    std::cout<<"the "<<i<<" is saved"<<std::endl;
+                    std::cout<<"*******cluster*****"<<i<<" is saved"<<std::endl;
                     std::cout<<"dirName= "<<dirName<<std::endl;
                     sprintf(filename_temp,"./%s/",dirName);
                     sprintf(filename,"%s%d.pcd",filename_temp,i);
@@ -513,7 +520,6 @@ public:
 //////////////////天灭中共已结束//////////////////////////
 
                 }//cluster循环结束
-            }//for文件夹循环结束
       }//ifcloud循环结束
       if (image_mutex_.try_lock ())
       {
